@@ -1,30 +1,20 @@
-<script context="module">                                                                                                                                                                                                                                                                   
-  export async function preload({ params, query }) {
-    // the `slug` parameter is available because
-    // this file is called [slug].svelte
-    const res = await this.fetch(`_posts/${params.slug}.md`);
+<script context="module">
+	export async function preload({ params }) {
+		// the `slug` parameter is available because
+		// this file is called [slug].svelte
+		const res = await this.fetch(`blog/${params.slug}.json`);
+		const data = await res.json();
 
-    if (res.status === 200) {
-      return { postMd: await res.text() };
-    } else {
-      this.error(res.status, data.message);
-    }
-  }
+		if (res.status === 200) {
+			return { post: data };
+		} else {
+			this.error(res.status, data.message);
+		}
+	}
 </script>
 
 <script>
-  import fm from 'front-matter';
-  import MarkdownIt from 'markdown-it';
-
-  export let postMd;
-
-  const md = new MarkdownIt();
-
-  $: frontMatter = fm(postMd);
-  $: post = {
-    ...frontMatter.attributes,
-    html: md.render(frontMatter.body)
-  };
+	export let post;
 </script>
 
 <style>
