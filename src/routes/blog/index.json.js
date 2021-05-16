@@ -3,31 +3,39 @@ import glob from 'glob';
 import {fs} from 'mz';
 import path from 'path';
 
-export async function get(req, res) {
-  // List the Markdown files and return their filenames
-  const posts = await new Promise((resolve, reject) =>
-      glob('static/posts/*.md', (err, files) => {
+async function getCollection( pattern ){
+  // find all files that match the pattern
+  // return file names
+  return new Promise((resolve, reject) =>
+      glob(`static/${pattern}`, (err, files) => {
       if (err) return reject(err);
       return resolve(files);
     }),
   );
+}
 
-  // Read the files and parse the metadata + content
-  const postsFrontMatter = await Promise.all(
-    posts.map(async post => {
-      const content = (await fs.readFile(post)).toString();
-      // Add the slug (based on the filename) to the metadata, so we can create links to this blog post
-      return {...grayMatter(content).data, slug: path.parse(post).name};
+function readCollection( fileslist ){
+  return Promise.all(
+    fileslist.map(async file => {
+      const content = (await fs.readFile(file)).toString();
+      // return frontmatter dataset together with slug
+      return {...grayMatter(content).data, slug: path.parse(file).name};
     }),
   );
+}
 
-  // Sort by reverse date, because it's a blog
-  postsFrontMatter.sort((a, b) => (a.date < b.date ? 1 : -1));
+function sortCollection( collection, field ){
+  return collection.sort((a, b) => (a[field] < b[field] ? 1 : -1));
+}
+
+export async function get(req, res) {
+
+  const files = await getCollection('posts/*.md');
+  let contents = await readCollection( files );
+  contents = sortCollection( contents, 'date' );
 
   res.writeHead(200, {
     'Content-Type': 'application/json',
   });
-
-  // Send the list of blog posts to our Svelte component
-  res.end(JSON.stringify(postsFrontMatter));
+  res.end(JSON.stringify(contents));
 }
