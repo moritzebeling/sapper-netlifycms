@@ -1,6 +1,6 @@
 ---
 layout: blog
-title: First post title
+title: First post title 2
 date: 2021-05-09T15:37:27.278Z
 image: /uploads/my-image.jpg
 ---
