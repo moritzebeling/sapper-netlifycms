@@ -1,4 +1,7 @@
 <script>
+
+	import Image from '../components/Image.svelte';
+
 </script>
 
 <style>
@@ -28,6 +31,8 @@
 <svelte:head>
     <title>Sapper project template</title>
 </svelte:head>
+
+<Image src="/uploads/my-image.jpg" />
 
 <h1>Great success!</h1>
 
